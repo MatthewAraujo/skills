@@ -3,9 +3,10 @@ set -euo pipefail
 
 # Configure this to the command you use to run your coding agent non-interactively.
 # Example:
-#   AGENT_CMD="codex exec"
+#   AGENT_CMD="codex exec --dangerously-bypass-approvals-and-sandbox -C \"$PWD\""
 #   AGENT_CMD="claude -p"
-AGENT_CMD="${AGENT_CMD:-codex exec}"
+AGENT_CMD="${AGENT_CMD:-codex exec --dangerously-bypass-approvals-and-sandbox}"
+WORKDIR="$(pwd)"
 
 MAX_TASKS="${MAX_TASKS:-50}"
 RUN_DIR=".agent/task-loop"
@@ -71,7 +72,7 @@ Do not start the next task.
 PROMPT
 
   set +e
-  $AGENT_CMD <"$PROMPT_FILE"
+  $AGENT_CMD -C "$WORKDIR" <"$PROMPT_FILE"
   AGENT_EXIT=$?
   set -e
 
