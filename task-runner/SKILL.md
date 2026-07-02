@@ -1,87 +1,98 @@
 ---
 name: task-runner
-description: Execute implementation tasks one at a time from docs/TASKS.md by preparing minimal context, invoking tdd for a single task, updating task status, and writing a handoff summary. Use after task-planner or generate-project when the user wants to progress through tasks safely without overloading context.
+description: Execute the next planned implementation task from docs/TASKS.md or docs/tasks/*.md. Use after task-planner or generate-project when the user wants to continue implementation one task at a time.
 ---
 
 # task-runner
 
-Use this skill to execute exactly one implementation task from `docs/TASKS.md`.
+Use this skill to run one planned implementation task through a tight loop:
 
-The goal is to keep implementation sessions small, traceable, and safe by selecting a single runnable task, preparing a minimal context pack, handing that task to `tdd`, recording the outcome, and stopping.
+1. select one runnable task;
+2. prepare the smallest context pack that `tdd` needs;
+3. run `tdd` for that task only;
+4. record the outcome;
+5. stop.
 
-This skill is an orchestration skill.
+This skill orchestrates implementation.
+It does not replace `tdd`.
+It must not silently continue into a second task.
 
-It must not implement every task in one pass.
-It must not replace `tdd`.
-
-## When to Use
+## Use
 
 Use this skill when:
 
-- `docs/TASKS.md` exists;
-- the user wants to execute the next planned task;
-- the user wants to continue implementation after `generate-project`;
-- the user wants to avoid context bloat across many tasks;
-- the user says "run next task", "continue task loop", "execute TASKS.md", or similar.
+- a task plan already exists in `docs/TASKS.md` or `docs/tasks/*.md`;
+- the user wants to continue planned implementation;
+- the user wants the next task executed without carrying the whole project history forward;
+- the user says "run the next task", "continue the task loop", or equivalent.
 
-## When Not to Use
+## Redirect
 
 Do not use this skill when:
 
-- there is no `docs/TASKS.md`;
-- the PRD is missing for feature or refactor work;
-- the task plan is not clear;
-- the user is still discussing requirements;
-- the user wants to generate a project skeleton first;
-- the user asks for a broad implementation without task boundaries.
+- no task plan exists;
+- feature or refactor work is missing `docs/PRD.md`;
+- requirements are still being clarified;
+- the project foundation still needs to be generated;
+- the user wants broad implementation without task boundaries.
 
-If `docs/TASKS.md` is missing, return to `task-planner`.
+If the task plan is missing, return to `task-planner`.
 
-If the project skeleton is missing, return to `generate-project`.
+If the project foundation is missing for a greenfield project, return to `generate-project`.
 
-## Required Inputs
+## Inputs
 
-Read these files when they exist:
+Read only the files needed to select and execute the next task.
+
+Possible inputs:
 
 1. `PROJECT.md`
 2. `CONTEXT.md`
 3. `docs/PRD.md`
 4. `docs/TASKS.md`
-5. `docs/adr/`
-6. `docs/GLOSSARY.md`
-7. `docs/task-runs/`
+5. `docs/tasks/*.md`
+6. `docs/adr/`
+7. `docs/GLOSSARY.md`
+8. previous files in `docs/task-runs/`
 
-Do not load all files blindly.
-
-Load only the documents needed to select and execute the next task.
+Do not load every document blindly.
 
 ## Task Selection
 
-Select exactly one task.
+Select exactly one task from the active task plan.
 
-Task priority:
+Priority:
 
 1. first task with `Status: ready`;
 2. otherwise first task with `Status: planned`;
-3. otherwise first task with `Status: blocked` only if the blocking condition has been resolved;
-4. otherwise report that there are no runnable tasks.
+3. otherwise first task with `Status: blocked` only if the blocker is now resolved;
+4. otherwise stop and report that there is no runnable task.
 
-Do not execute tasks marked:
+Do not take tasks marked `done`, `cancelled`, `blocked`, or `in_progress` unless the user explicitly names that task.
 
-- `done`
-- `cancelled`
-- `blocked`
-- `in_progress`
+## Tight Loop
 
-unless the user explicitly requests that task.
+### 1. Load just enough context
 
-## Context Pack
+Read the smallest set of planning and memory files needed to understand the next runnable task.
 
-Before invoking `tdd`, create or update:
+Completion criterion:
+You can name the active task-plan file, the selected task id, and the acceptance criteria that task serves.
+
+### 2. Claim one task
+
+Mark the selected task as `Status: in_progress` before implementation starts.
+
+Completion criterion:
+Exactly one task in the active plan is marked `in_progress` for this run.
+
+### 3. Build the context pack
+
+Create or update:
 
 `docs/task-runs/<task-id>-context.md`
 
-The context pack must include:
+Use this structure:
 
 ```md
 # <task-id> Context
@@ -103,43 +114,31 @@ The context pack must include:
 ## Definition of Done
 ```
 
-The context pack must be minimal.
+Keep the context pack tight.
+Summarize only the material needed for this task.
+Do not paste the full PRD or full task plan.
 
-Do not paste the entire PRD or entire TASKS file into the context pack.
+Completion criterion:
+`tdd` can execute the task from the context pack without loading unrelated history.
 
-Summarize only the parts relevant to the selected task.
+### 4. Hand off to `tdd`
 
-## Execution Flow
+Run `tdd` for the selected task only.
 
-Use this flow:
-
-1. Load project memory and task plan.
-2. Select one runnable task.
-3. Mark the task as `in_progress`.
-4. Create a minimal task context pack.
-5. Invoke `tdd` for that single task.
-6. Run or request relevant tests.
-7. Update task status.
-8. Write task summary.
-9. Stop.
-
-## Interaction With tdd
-
-After the context pack is prepared, hand off to `tdd`.
-
-`tdd` must:
+`tdd` should:
 
 - write or update the failing test first when feasible;
-- implement the minimum code needed for the selected task;
-- run relevant tests;
+- implement only the minimum code needed for this task;
+- run relevant validation;
 - refactor only after tests pass;
-- avoid unrelated changes.
+- avoid unrelated edits.
 
-The selected task is the only implementation scope.
+Completion criterion:
+Implementation and validation attempted only within the selected task boundary.
 
-## Task Status Updates
+### 5. Record the outcome
 
-Update `docs/TASKS.md` after the run.
+Update the task plan status based on the result.
 
 Allowed statuses:
 
@@ -150,33 +149,35 @@ Allowed statuses:
 - `done`
 - `cancelled`
 
-If the task is completed, mark it:
+Use:
 
 ```txt
 Status: done
 ```
 
-If the task cannot continue, mark it:
+when the task is complete.
+
+Use:
 
 ```txt
 Status: blocked
 Blocker: <reason>
 ```
 
-If tests fail and cannot be fixed within the task scope, mark it:
+when the task cannot continue.
+
+If validation fails and the issue cannot be fixed within scope, mark:
 
 ```txt
 Status: blocked
 Blocker: failing validation
 ```
 
-## Handoff Summary
-
-After each task, create or update:
+Create or update:
 
 `docs/task-runs/<task-id>-summary.md`
 
-The summary must include:
+Use this structure:
 
 ```md
 # <task-id> Summary
@@ -200,51 +201,81 @@ The summary must include:
 ## Context for Next Task
 ```
 
-This summary is the only previous-task context that future task runs should load by default.
+This summary is the default prior-run context for future task executions.
 
-Do not rely on the full conversation history.
+Completion criterion:
+The task plan status and the task summary both match the actual outcome of the run.
 
-## Memory Update Rules
+### 6. Stop
 
-After task completion, decide whether the task revealed durable project knowledge.
+After one task is `done` or `blocked`, stop.
 
-If yes, update `CONTEXT.md` only for durable decisions, risks, domain rules, or implementation discoveries.
+The final response must say:
 
-Update `PROJECT.md` only if stable operational project information changed, such as scripts, setup, test commands, architecture overview, or required services.
+- which task was executed;
+- whether it completed or blocked;
+- what the next runnable task is.
 
-Do not duplicate task summaries into `CONTEXT.md`.
+Completion criterion:
+No second task is started automatically.
 
-## Stop Rule
+## Memory Updates
 
-After one task is completed or blocked, stop.
+After the run, decide whether the task revealed durable project knowledge.
 
-Do not automatically start the next task unless the user explicitly asks.
+Update `CONTEXT.md` only for durable decisions, risks, domain rules, or implementation discoveries.
 
-The final response must say which task was executed and what the next runnable task is.
+Update `PROJECT.md` only if stable operational knowledge changed, such as scripts, setup, commands, architecture overview, or required services.
 
-## Safety Rules
+Do not copy task-run summaries into `CONTEXT.md`.
 
-- Execute exactly one task per run.
-- Do not implement unrelated tasks.
-- Do not load unnecessary context.
-- Do not continue if task scope is ambiguous.
-- Do not overwrite unrelated user changes.
-- Do not run destructive commands.
-- Do not mark a task as done without validation evidence or an explicit limitation.
-- Do not bypass `tdd` for implementation.
-- Do not silently edit the PRD to fit the implementation.
+## Commits
 
-## Quality Checklist
+After a completed task, commit only when the environment allows it and the user has authorized commits.
+
+Commits must be atomic and describe the actual change, not the task number.
+
+Good examples:
+
+```txt
+Add project health check endpoint
+Configure integration test database setup
+Implement user creation validation
+```
+
+Bad examples:
+
+```txt
+Done task 2
+Update files
+Fix stuff
+```
+
+Do not commit broken code unless the user explicitly asks for that state.
+
+## Rules
+
+- execute exactly one task per run;
+- do not implement unrelated tasks;
+- do not load unnecessary context;
+- do not continue when scope is ambiguous;
+- do not overwrite unrelated user changes;
+- do not run destructive commands;
+- do not mark a task `done` without validation evidence or an explicit limitation;
+- do not bypass `tdd` for implementation;
+- do not edit the PRD to fit the implementation.
+
+## Checklist
 
 Before finishing, verify:
 
 - exactly one task was selected;
-- the task had a clear acceptance criterion mapping;
+- the task maps to explicit acceptance criteria;
 - a context pack was created or updated;
 - `tdd` was used for implementation;
 - tests were added or updated when feasible;
 - relevant validation commands were run or explicitly skipped with reason;
-- `docs/TASKS.md` status was updated;
+- the task-plan status was updated;
 - a handoff summary was written;
-- next task is clear;
-- no unrelated tasks were implemented.
+- the next runnable task is clear;
+- no unrelated task work was included.

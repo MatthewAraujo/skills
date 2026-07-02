@@ -1,317 +1,120 @@
 ---
 name: extract-backend-blueprint
-description: Analyze a mature reference backend API repository and extract a reusable backend architecture blueprint for future greenfield projects. Use only when the user explicitly wants to turn a specific repository into a reusable reference document.
+description: Extract a reusable backend blueprint from a specific reference API repository. Use when the user wants to turn one backend repo into a greenfield architecture guide.
 ---
 
 # extract-backend-blueprint
 
-Use this skill when the user explicitly asks to analyze a backend API repository that they consider a high-quality reference and extract a reusable blueprint for future projects.
+Use this skill to reverse-engineer one mature backend repository into a reusable blueprint for future greenfield projects.
 
-## Purpose
+The job is not to summarize the repository.
+The job is to turn repository evidence into reusable engineering guidance without copying business-specific code.
 
-The goal is not to summarize the repository.
+The leading rule is evidence:
 
-The goal is to reverse-engineer its reusable engineering patterns into a practical backend blueprint covering architecture, testing, dependency injection, SOLID boundaries, code organization, API conventions, persistence, configuration, security, CI/CD, and developer experience.
+- claim only what the repository shows;
+- separate confirmed patterns from inference;
+- send missing but desirable practices to a gaps section instead of inventing them.
 
-The resulting document must help an AI agent or developer create a new backend API using the same proven engineering style without blindly copying the original repository.
+## Use
 
-## Output Location
+Use this skill when the user explicitly wants to analyze a specific backend API repository and keep the result as a reusable architecture reference.
 
-Create one of the following files:
+## Redirect
 
-```text
-blueprints/backend/<repo-name>-blueprint.md
-```
+Do not use this skill:
 
-Preferred example:
+- for a general repo summary;
+- for frontend or mixed-product design work that is not primarily backend;
+- when the source repository is not identified;
+- when the user wants implementation instead of documentation.
 
-```text
-blueprints/backend/nestjs-clean-api-blueprint.md
-```
+## Output
 
-If the user explicitly asks for a standalone file, create:
+Write one of:
 
-```text
-BACKEND_BLUEPRINT.md
-```
+- `blueprints/backend/<repo-name>-blueprint.md`
+- `BACKEND_BLUEPRINT.md` when the user explicitly asks for a standalone file
 
-If the current repository already has a blueprint convention, follow it.
+If the repository already has a blueprint convention, follow it.
 
-## Required Inputs
+## Evidence Loop
 
-Before writing the blueprint, inspect the repository evidence.
+### 1. Fix the source and output boundary
 
-Read relevant files such as:
+Confirm the exact repository being analyzed and the output path to write.
+
+Completion criterion:
+The source repository and output file path are both explicit.
+
+### 2. Gather representative evidence
+
+Inspect repository evidence before writing claims.
+
+Typical evidence sources:
 
 - `README.md`
-- `package.json`, `pnpm-lock.yaml`, `yarn.lock`, `package-lock.json`, or equivalent
+- dependency manifests and lockfiles
 - framework config files
-- `src/` or application source directories
-- module/controller/service/repository/use-case files
-- dependency injection modules/providers
-- DTOs, schemas, validators, pipes, guards, interceptors, middlewares
-- database models/entities/migrations/seeds
-- test files
-- test setup files
-- Docker and Docker Compose files
-- environment/config files
+- `src/` or equivalent application code
+- controllers, services, repositories, use cases, and modules
+- DTOs, schemas, validators, guards, interceptors, middlewares
+- entities, models, migrations, seeds, and persistence setup
+- tests and test setup files
+- Docker and Compose files
+- environment and config files
 - CI/CD workflows
-- lint/format/typecheck config
-- existing docs, ADRs, or architecture notes
+- lint, format, and typecheck config
+- architecture docs or ADRs
 
-Do not rely only on file names. Inspect representative source files and tests.
+Do not rely on file names alone.
+Inspect representative source files and tests from each claimed area.
 
-## Repository Analysis Checklist
+Completion criterion:
+Every major section of the future blueprint has concrete evidence or an explicit note that the area is absent or weak.
 
-Analyze the repository across these dimensions.
+### 3. Extract reusable patterns
 
-### 1. Project Identity
+Analyze the repository across these dimensions:
 
-Document:
+1. project identity
+2. tech stack
+3. repository structure
+4. architectural style
+5. dependency injection
+6. SOLID and engineering principles
+7. testing strategy
+8. API design
+9. data and persistence
+10. configuration and environment
+11. observability and operations
+12. security
+13. developer experience
+14. CI/CD and quality gates
+15. reusable starter patterns
 
-- what the backend does;
-- API style;
-- main domain concepts;
-- primary users or actors;
-- runtime assumptions;
-- deployment assumptions.
-
-### 2. Tech Stack
-
-Document:
-
-- language and runtime;
-- framework;
-- package manager;
-- database;
-- ORM/query builder;
-- cache;
-- queue/broker;
-- authentication/authorization;
-- validation library;
-- testing libraries;
-- build tooling;
-- linting/formatting;
-- CI/CD;
-- infrastructure tooling.
-
-Separate confirmed evidence from inferred assumptions.
-
-### 3. Repository Structure
-
-Document important folders and their responsibilities.
-
-Look for:
-
-- application entrypoints;
-- module boundaries;
-- domain/application/infrastructure separation;
-- shared/common utilities;
-- test structure;
-- configuration structure;
-- migration structure;
-- scripts and automation.
-
-### 4. Architectural Style
-
-Identify the actual architectural style used by the repository.
-
-Examples may include:
-
-- layered architecture;
-- clean architecture;
-- hexagonal architecture;
-- modular monolith;
-- controller/service/repository;
-- use-case driven architecture;
-- domain-driven boundaries;
-- ports and adapters.
-
-For each pattern, document:
+For each pattern you keep, capture:
 
 - where it appears;
 - why it matters;
-- how to reproduce it in a new project;
-- when not to apply it.
+- how to reuse it;
+- when not to use it.
 
-Do not claim the repository uses a pattern unless there is visible evidence.
+Completion criterion:
+Each claimed reusable pattern is backed by repository evidence and framed as guidance for a new project.
 
-### 5. Dependency Injection
+### 4. Separate patterns from gaps
 
-Analyze how dependencies are declared, registered, composed, and replaced.
+When the repository lacks something important, record it under gaps or recommended improvements.
 
-Document:
+Do not present missing practices as existing patterns.
 
-- DI container or module system;
-- provider registration pattern;
-- interface-to-implementation binding;
-- service lifetimes or scopes;
-- dependency inversion boundaries;
-- how dependencies are mocked or replaced in tests;
-- anti-patterns to avoid.
+Completion criterion:
+The blueprint never confuses observed behavior with suggested improvements.
 
-### 6. SOLID and Engineering Principles
+### 5. Write the blueprint
 
-Tie design principles to concrete repository examples.
-
-Analyze:
-
-- Single Responsibility Principle;
-- Open/Closed Principle;
-- Liskov Substitution Principle, if relevant;
-- Interface Segregation Principle;
-- Dependency Inversion Principle;
-- KISS;
-- YAGNI;
-- DRY;
-- testability.
-
-Do not write generic textbook definitions. Explain how the repository demonstrates or violates each principle.
-
-### 7. Testing Strategy
-
-Analyze the repository's real testing approach.
-
-Document:
-
-- unit test patterns;
-- integration test patterns;
-- e2e/API test patterns;
-- test database setup;
-- fixtures, factories, builders, or seed helpers;
-- mocks, stubs, fakes, and dependency overrides;
-- authentication setup in tests;
-- error scenario testing;
-- regression testing style;
-- test naming conventions;
-- test commands;
-- coverage expectations, if present.
-
-Produce a recommended testing pyramid for future projects based on the repository evidence.
-
-### 8. API Design
-
-Analyze:
-
-- route/controller organization;
-- request validation;
-- response format;
-- DTO or schema conventions;
-- pagination/filtering/sorting;
-- error response shape;
-- status code usage;
-- auth guards or middleware;
-- API versioning;
-- OpenAPI/Swagger conventions, if present.
-
-### 9. Data and Persistence
-
-Analyze:
-
-- entity/model structure;
-- repository pattern;
-- query organization;
-- transactions;
-- migrations;
-- seeds;
-- connection management;
-- database constraints;
-- consistency and concurrency patterns;
-- persistence error handling.
-
-### 10. Configuration and Environment
-
-Document:
-
-- environment variables;
-- config validation;
-- local development setup;
-- test environment setup;
-- Docker or Docker Compose usage;
-- secret handling;
-- environment-specific behavior.
-
-### 11. Observability and Operations
-
-Analyze:
-
-- logging;
-- metrics;
-- tracing;
-- health checks;
-- readiness/liveness checks;
-- error reporting;
-- background jobs;
-- retries;
-- rate limiting;
-- operational scripts.
-
-If these are missing, mark them as gaps.
-
-### 12. Security
-
-Analyze:
-
-- authentication;
-- authorization;
-- input validation;
-- token/password handling;
-- sensitive data handling;
-- CORS;
-- security headers;
-- SQL injection prevention;
-- safe error exposure;
-- dependency/security scanning.
-
-### 13. Developer Experience
-
-Document:
-
-- install command;
-- run command;
-- test commands;
-- lint/typecheck commands;
-- migration commands;
-- formatting commands;
-- local setup sequence;
-- recommended first-time developer workflow.
-
-### 14. CI/CD and Quality Gates
-
-Analyze:
-
-- GitHub Actions or equivalent CI;
-- lint gate;
-- typecheck gate;
-- test gate;
-- build gate;
-- coverage gate;
-- migration validation;
-- deployment pipeline;
-- required checks before merge.
-
-### 15. Reusable Project Template
-
-Create a practical section for future greenfield projects.
-
-Include:
-
-- recommended initial folder structure;
-- first files to create;
-- required dependencies;
-- DI setup;
-- config setup;
-- database setup;
-- first endpoint pattern;
-- first service/use-case pattern;
-- first repository/adapter pattern;
-- first unit test pattern;
-- first integration/e2e test pattern;
-- minimum CI quality gates.
-
-## Required Blueprint Structure
-
-The generated blueprint must use this structure:
+Use this structure:
 
 ```md
 # Backend Blueprint: <Repository or Architecture Name>
@@ -357,11 +160,7 @@ The generated blueprint must use this structure:
 ## 20. Gaps and Recommended Improvements
 ```
 
-## Evidence Requirement
-
-Every major recommendation must cite concrete repository evidence.
-
-Use this format:
+Use this pattern format for major reusable findings:
 
 ```md
 ### Pattern: <pattern name>
@@ -380,29 +179,213 @@ When not to use:
 <constraints or caveats>
 ```
 
-If a practice is not present but would be useful, document it under `Gaps and Recommended Improvements`, not as an existing pattern.
+Completion criterion:
+The written blueprint is reusable for greenfield work without rereading the source repository.
 
-## Output Quality Rules
+### 6. Close with practical guidance
 
-- Do not modify production code.
-- Do not invent repository patterns.
-- Do not produce a vague best-practices article.
-- Prefer concrete, reusable rules extracted from the repository.
-- Distinguish evidence from recommendations.
-- Mark weak or missing areas explicitly.
-- Keep framework-specific guidance separate from general backend architecture guidance.
-- Do not copy business-specific logic into the blueprint unless it demonstrates a reusable engineering pattern.
-- Do not include secrets, credentials, internal URLs, or sensitive operational details.
-- Do not make the generated blueprint part of the default project workflow.
+In the final response, report:
 
-## Final Response
+- the output file path;
+- the repository areas inspected;
+- the strongest reusable patterns found;
+- the weakest areas or gaps;
+- how the user should reuse the blueprint in a future project.
 
-After generating the blueprint, report:
+Completion criterion:
+The user can act on the blueprint immediately.
 
-- output file path;
-- repository areas inspected;
-- strongest reusable patterns found;
-- gaps or weak areas;
-- how the user can reuse the blueprint in a future project.
+## Analysis Notes
 
-Keep the final response concise and practical.
+### Project Identity
+
+Document:
+
+- what the backend does;
+- API style;
+- main domain concepts;
+- primary users or actors;
+- runtime assumptions;
+- deployment assumptions.
+
+### Tech Stack
+
+Document:
+
+- language and runtime;
+- framework;
+- package manager;
+- database;
+- ORM or query builder;
+- cache;
+- queue or broker;
+- authn and authz tooling;
+- validation library;
+- testing libraries;
+- build tooling;
+- linting and formatting;
+- CI/CD;
+- infrastructure tooling.
+
+Separate confirmed evidence from inference.
+
+### Dependency Injection
+
+Analyze:
+
+- container or module system;
+- provider registration pattern;
+- interface-to-implementation binding;
+- service lifetimes or scopes when relevant;
+- dependency inversion boundaries;
+- how tests replace dependencies;
+- anti-patterns to avoid.
+
+### SOLID and Engineering Principles
+
+Tie principles to repository evidence.
+
+Do not write textbook definitions.
+Explain how the repository demonstrates or violates:
+
+- SRP;
+- OCP;
+- LSP when relevant;
+- ISP;
+- DIP;
+- KISS;
+- YAGNI;
+- DRY;
+- testability.
+
+### Testing Strategy
+
+Analyze the real testing approach:
+
+- unit tests;
+- integration tests;
+- e2e or API tests;
+- test database setup;
+- fixtures, factories, builders, or seed helpers;
+- mocks, stubs, fakes, and dependency overrides;
+- auth setup in tests;
+- error-path coverage;
+- regression style;
+- naming conventions;
+- commands;
+- coverage expectations when present.
+
+Recommend a testing pyramid based on the evidence.
+
+### API Design
+
+Analyze:
+
+- route and controller organization;
+- request validation;
+- response shape;
+- DTO or schema conventions;
+- pagination, filtering, and sorting;
+- error responses;
+- status code usage;
+- auth guards or middleware;
+- versioning;
+- OpenAPI or Swagger when present.
+
+### Data and Persistence
+
+Analyze:
+
+- entity and model structure;
+- repository pattern;
+- query organization;
+- transactions;
+- migrations;
+- seeds;
+- connection management;
+- database constraints;
+- consistency and concurrency patterns;
+- persistence error handling.
+
+### Configuration and Environment
+
+Document:
+
+- environment variables;
+- config validation;
+- local development setup;
+- test environment setup;
+- Docker or Compose usage;
+- secret handling;
+- environment-specific behavior.
+
+### Observability and Operations
+
+Analyze:
+
+- logging;
+- metrics;
+- tracing;
+- health checks;
+- readiness and liveness checks;
+- error reporting;
+- background jobs;
+- retries;
+- rate limiting;
+- operational scripts.
+
+Mark missing operational practices as gaps.
+
+### Security
+
+Analyze:
+
+- authentication;
+- authorization;
+- input validation;
+- token and password handling;
+- sensitive data handling;
+- CORS;
+- security headers;
+- SQL injection prevention;
+- safe error exposure;
+- dependency or security scanning.
+
+### Developer Experience
+
+Document:
+
+- install command;
+- run command;
+- test commands;
+- lint and typecheck commands;
+- migration commands;
+- formatting commands;
+- local setup sequence;
+- recommended first-time developer workflow.
+
+### CI/CD and Quality Gates
+
+Analyze:
+
+- GitHub Actions or equivalent CI;
+- lint gates;
+- typecheck gates;
+- test gates;
+- build gates;
+- coverage gates;
+- migration validation;
+- deployment pipeline;
+- required checks before merge.
+
+## Rules
+
+- do not modify production code;
+- do not invent repository patterns;
+- do not produce a vague best-practices article;
+- prefer concrete, reusable rules extracted from the repository;
+- distinguish evidence from recommendations;
+- keep framework-specific guidance separate from general backend guidance;
+- do not copy business-specific logic unless it demonstrates a reusable engineering pattern;
+- do not include secrets, credentials, internal URLs, or sensitive operational details;
+- do not make the generated blueprint part of the default project workflow.

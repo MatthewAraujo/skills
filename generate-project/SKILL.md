@@ -1,41 +1,46 @@
 ---
 name: generate-project
-description: Generate a new software project from an approved PRD, task plan, and optional architecture blueprint. Use when the user wants to create a new project from scratch using existing workflow artifacts and reference blueprints.
+description: Generate a new project skeleton from docs/PRD.md, the task plan, and an optional blueprint. Use when the user wants to bootstrap a new codebase before feature implementation starts.
 ---
 
 # generate-project
 
-Use this skill to generate the first commit of a new project from approved planning artifacts.
+Use this skill to create the first usable foundation of a new project from approved planning artifacts.
 
-The goal is to create a minimal, production-oriented foundation that is ready for implementation through `tdd`.
+The job is to generate the smallest production-oriented skeleton that the task plan needs so implementation can continue through `tdd`.
 
-## When to Use
+This skill creates the foundation only.
+It does not implement product features.
+It does not replace `task-planner` or `tdd`.
 
-Use this skill when the user wants to create a new project from scratch and the specification already exists in repository artifacts or in the current conversation.
+## Use
 
-Typical triggers:
+Use this skill when:
 
-- a new project must be bootstrapped from `docs/PRD.md`;
-- a task plan already exists in `docs/TASKS.md` or `docs/tasks/*.md`;
-- a backend or frontend blueprint exists and should guide the architecture;
-- the user wants the initial structure, tooling, documentation, and test setup generated before feature work starts.
+- the user wants a new project bootstrapped from approved repository artifacts;
+- `docs/PRD.md` and a task plan already define the scope;
+- a backend or frontend blueprint should shape the architecture;
+- the next useful step is creating the initial repository structure, tooling, test harness, and project docs.
 
-## When Not to Use
+## Redirect
 
 Do not use this skill:
 
 - for feature work inside an existing project;
-- as a substitute for `tdd`;
 - before requirements are approved;
-- when `docs/PRD.md` is missing and the conversation does not provide equivalent requirements;
+- before a task plan exists;
 - to clone a reference repository verbatim;
-- to generate speculative modules, features, or infrastructure not required by the approved scope.
+- to generate speculative modules, infrastructure, or features outside the approved scope.
 
-## Required Inputs
+If `docs/PRD.md` is missing, return to `to-prd`.
 
-Read the available specification artifacts before generating files.
+If the task plan is missing, return to `task-planner`.
 
-Inspect these inputs in this order when they exist:
+If the target directory already contains a meaningful project, stop and ask whether to generate in a new location or adapt to the existing codebase.
+
+## Inputs
+
+Read these inputs in order when they exist:
 
 1. `docs/PRD.md`
 2. `docs/TASKS.md`
@@ -45,184 +50,167 @@ Inspect these inputs in this order when they exist:
 6. `docs/adr/*.md`
 7. `docs/GLOSSARY.md`
 
-`docs/PRD.md` is mandatory unless the user explicitly provides equivalent requirements in the current conversation.
+`docs/PRD.md` is mandatory.
 
-`docs/TASKS.md` or an equivalent task plan is strongly recommended and should be treated as the implementation boundary for the generated skeleton.
+An existing task plan is mandatory because it defines the boundary for the generated foundation.
 
-Before generating files, identify:
+## Optional Blueprint Inputs
 
-- the target project type;
-- the selected stack;
-- the baseline runtime and tooling;
-- whether the project is backend, frontend, full-stack, CLI, library, or another defined type;
-- the smallest viable structure needed to support the approved scope.
-
-## Optional Inputs
-
-Load these inputs when available and relevant:
+Load these only when relevant:
 
 - `blueprints/backend/*.md`
 - `blueprints/frontend/*.md`
-- existing repository conventions in adjacent generated projects;
-- any user-provided stack constraints from the current conversation
+- existing local conventions in adjacent generated projects
+- explicit stack constraints from the user
 
-A blueprint is optional, but when one is provided it becomes the primary architecture reference.
+When a blueprint is present, treat it as the primary architecture reference.
+Use it to shape the foundation, not to expand scope.
 
-Use optional inputs to refine structure and conventions, not to expand scope.
+## Foundation Loop
 
-## Generation Flow
+### 1. Load the approved boundary
 
-Follow this flow:
+Read the PRD, task plan, and the smallest amount of project memory needed to understand what the new project must support first.
 
-1. Load specification artifacts
-   Read the PRD, task plan, glossary, ADRs, and project memory that define scope and constraints.
-2. Load optional blueprint
-   Read the relevant backend or frontend blueprint before generating files.
-3. Identify target stack and project type
-   Confirm the runtime, framework, package manager, testing tools, and project shape.
-4. Define minimal project skeleton
-   Choose the smallest production-oriented structure that satisfies the PRD and task plan.
-5. Generate baseline files
-   Create only the files needed to bootstrap the project safely.
-6. Add test infrastructure
-   Add the initial unit and integration or e2e setup required for `tdd`.
-7. Add documentation
-   Document install, run, test, configuration, and extension guidance.
-8. Validate generated structure
-   Check that the generated output matches the PRD, task plan, and blueprint when present.
-9. Produce handoff to tdd
-   End with a clear next step for feature implementation.
+Completion criterion:
+You can name the project type, selected stack, baseline runtime/tooling, and the first planned implementation tasks the foundation must enable.
 
-At every step, prefer KISS, YAGNI, DRY, SOLID where useful, testability, explicitness, and incrementality.
+### 2. Check generation safety
 
-## Blueprint Handling
+Confirm the target location is safe to generate into.
 
-If a blueprint is provided:
+Stop if:
 
-1. Read the blueprint before generating files.
-2. Treat the blueprint as the primary architecture reference.
-3. Extract only the parts that are relevant to the current PRD, task plan, and selected stack.
-4. Adapt the blueprint to the new project instead of copying domain-specific code or irrelevant modules.
-5. Preserve useful conventions around:
-   - folder structure;
-   - dependency injection;
-   - testing;
-   - validation;
-   - error handling;
-   - persistence;
-   - configuration;
-   - observability;
-   - CI/CD;
-   - documentation.
+- generation would overwrite a meaningful existing project;
+- the stack is still ambiguous;
+- the task plan is too vague to define a minimal skeleton.
 
-The blueprint is a guide, not a source code template.
+Completion criterion:
+The generation target and safety boundary are explicit.
 
-Do not blindly copy the reference repository.
+### 3. Design the minimal foundation
 
-## Project Skeleton Requirements
+Choose the smallest production-oriented structure that supports the approved scope.
 
-Generate a minimal, production-oriented baseline.
+Decide only what is needed now:
 
-Create only the files required to bootstrap the project and begin implementation safely.
+- runtime and package manager;
+- framework and entrypoint shape;
+- folder structure;
+- configuration loading;
+- validation approach;
+- dependency injection approach when relevant;
+- test harness;
+- lint, format, and typecheck tooling when relevant;
+- baseline operational files such as Docker or Compose only when the scope actually needs them.
 
-Include relevant foundational files such as:
+Completion criterion:
+You can list the files and directories to create and explain why each one exists.
 
-- package or dependency manifest files;
-- framework configuration;
-- source directory structure;
+### 4. Generate the foundation
+
+Create only the files needed to bootstrap the project safely.
+
+Typical baseline files include:
+
+- dependency manifest files;
+- framework and tool configuration;
+- source directory skeleton;
 - application entrypoint;
-- health check endpoint or equivalent baseline behavior;
-- configuration module or configuration loading;
+- health check or equivalent baseline behavior;
+- configuration module or loader;
 - validation setup;
-- dependency injection setup when relevant to the stack;
+- dependency injection setup when relevant;
 - test setup;
-- first example unit test;
-- first example integration or e2e test when relevant;
-- lint, format, and typecheck configuration;
-- Docker or Docker Compose files when relevant;
-- environment variable example file.
+- one example unit test;
+- one example integration or e2e test when relevant;
+- environment example file.
 
-Prefer clear structure over hidden magic.
+Prefer explicit structure over hidden code generation magic.
 
-Do not generate large unused modules, speculative abstractions, or infrastructure that the PRD does not require.
+Do not generate large unused modules, speculative abstractions, or features from later tasks.
 
-## Documentation Requirements
+Completion criterion:
+The repository contains a coherent starter structure with no speculative code outside the approved foundation.
 
-Produce documentation that explains how to install, run, test, and extend the generated project.
+### 5. Document and validate
 
-At minimum, generate or update:
+Generate or update the docs that make the foundation usable.
+
+At minimum, create or update:
 
 - `README.md`;
-- `PROJECT.md` when the generated project should have a stable project handbook;
-- an initial ADR when a meaningful architecture decision is made.
+- `PROJECT.md` when the project should have a stable handbook;
+- an initial ADR when the generated architecture introduces a durable decision.
 
 Documentation should cover:
 
-- setup and dependency installation steps;
-- local run commands;
+- install steps;
+- run commands;
 - test commands;
 - lint, format, and typecheck commands when present;
 - environment variable expectations;
-- a short explanation of the generated structure;
-- how future work should continue from the task plan.
+- a short structure overview;
+- how work continues from the task plan.
 
-## Testing Requirements
+Validate that the structure matches the PRD, the task plan, and the blueprint when present.
+If a full test or runtime setup cannot yet be executed, document the gap explicitly.
 
-Do not skip test setup.
+Completion criterion:
+A new contributor can see how to install, run, test, and continue the project from the generated docs.
 
-The generated project must be ready for `tdd` from the first commit.
+### 6. Hand off to `tdd`
 
-Add:
-
-- the selected test framework and configuration;
-- one example unit test;
-- one example integration or e2e test when the project type makes that relevant;
-- baseline commands or scripts for running tests.
-
-Prefer tests that exercise public behavior and make future tracer-bullet development straightforward.
-
-If a full integration or e2e setup is not yet feasible, generate the safest minimal test infrastructure and document the gap explicitly.
-
-## Safety Rules
-
-- Do not overwrite an existing project unless the user explicitly confirms.
-- Do not delete existing files.
-- Do not generate secrets.
-- Do not hardcode credentials.
-- Do not install dependencies without user approval.
-- Do not run destructive commands.
-- Do not generate large unused modules.
-- Do not implement features beyond the approved PRD.
-- Do not skip test setup.
-- Do not skip documentation.
-
-If the target directory already contains meaningful files, stop and ask whether generation should occur in a new location or be adapted to the existing project.
-
-## Handoff to tdd
-
-End the generation process with an explicit handoff.
+End with a direct handoff to implementation.
 
 Use language like:
 
+```txt
 Ready for `tdd`.
 
-Start with the first task in `docs/TASKS.md`.
+Start with the first task in the task plan.
 Write the failing test first, then implement the minimum code needed to pass.
+```
 
-This skill creates the foundation only.
+Completion criterion:
+The first implementation task and the first test-first move are clear.
 
-Actual feature implementation must continue through `tdd`.
+## Blueprint Rules
 
-## Quality Checklist
+If a blueprint is provided:
+
+- read it before generating files;
+- extract only the parts relevant to the selected stack and current scope;
+- adapt its architecture patterns to the new project;
+- preserve useful conventions around structure, validation, persistence, testing, configuration, observability, CI/CD, and documentation;
+- do not copy domain-specific code or irrelevant modules.
+
+The blueprint is guidance, not a template dump.
+
+## Safety Rules
+
+- do not overwrite an existing project without explicit user confirmation;
+- do not delete existing files;
+- do not generate secrets;
+- do not hardcode credentials;
+- do not install dependencies without user approval;
+- do not run destructive commands;
+- do not generate large unused modules;
+- do not implement features beyond the approved PRD;
+- do not skip test setup;
+- do not skip documentation.
+
+## Checklist
 
 Before finishing, verify:
 
 - the generated project matches the PRD;
-- the generated structure follows the blueprint when provided;
-- the project has install, run, and test instructions;
-- the project has a basic test setup;
-- the project has a health check or equivalent baseline behavior;
-- the project has environment variable documentation;
+- the generated structure matches the task plan boundary;
+- the blueprint was followed where relevant;
+- install, run, and test instructions exist;
+- baseline test setup exists;
+- a health check or equivalent baseline behavior exists when relevant;
+- environment variable documentation exists;
 - no secrets were generated;
 - no speculative features were added;
-- the next step for `tdd` is clear.
+- the next `tdd` step is explicit.
