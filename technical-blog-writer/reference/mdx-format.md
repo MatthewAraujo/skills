@@ -478,9 +478,13 @@ The function returns `Promise<Post[]>`.
 
 ## Images
 
-Do not include images unless the user provides image paths or asks for image placement.
+Always prepare one cover image brief for every article.
 
-When images are provided, use Markdown image syntax:
+Keep the cover image brief outside the MDX body unless the user confirms the blog's cover-image metadata or file-path convention.
+
+Add supporting images only when they materially improve comprehension or narrative flow.
+
+When a supporting image is approved for placement in the post, use Markdown image syntax:
 
 ```md
 ![Architecture diagram](/images/ai-backend-factory-architecture.png)
@@ -489,9 +493,20 @@ When images are provided, use Markdown image syntax:
 Rules:
 
 * Use descriptive alt text.
+* Always include exactly one cover image brief.
+* Do not add inline images for every section by default.
+* Do not invent blog-specific metadata fields for images.
 * Do not invent image paths.
 * Do not include external images unless the user provides or approves them.
 * Do not include copyrighted images without permission.
+
+For each image brief, specify:
+
+* role: cover or supporting;
+* placement: article lead or target section;
+* purpose;
+* prompt or visual brief;
+* alt text.
 
 ## Tables
 
@@ -666,6 +681,12 @@ export const metadata = {
   description: "...",
 };
 
+Cover image brief:
+...
+
+Supporting image briefs:
+...
+
 Full MDX:
 ```
 
@@ -685,6 +706,8 @@ Before returning the final MDX post, verify:
 * The slug is lowercase and hyphenated.
 * The post starts with `export const metadata`.
 * The metadata includes `title`, `publishDate`, and `description`.
+* Exactly one cover image brief is included outside the MDX body.
+* Any supporting image briefs are justified by the article instead of added by default.
 * The date uses `YYYY-MM-DD`.
 * The body does not include a duplicate `# Title`.
 * Main sections use `##`.

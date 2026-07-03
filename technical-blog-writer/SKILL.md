@@ -17,6 +17,11 @@ Do not use this skill for marketing copy, release notes, README generation, or f
 - Language: same language as the user.
 - Format: Markdown article unless the user asks for another format.
 - Angle: engineering case study.
+- Images: always create one cover image brief; add supporting image briefs only when they materially improve the article.
+- Images: always create 700x380px image.
+- Image generator: OpenAI image API, using the local key from `/home/matthew/keys.md` when execution is required.
+
+Never print, paste, or embed the API key in the article, image prompts, or logs.
 
 ## Workflow
 
@@ -70,7 +75,30 @@ Use [reference/mdx-format.md](reference/mdx-format.md) and [assets/mdx-post-temp
 
 Done when: you have a title direction and section outline that fit one clear pattern.
 
-### 4. Draft from evidence
+### 4. Plan the visuals
+
+Always produce a cover image brief grounded in the article thesis.
+
+Add supporting image briefs only when an image will explain the system, sequence, or contrast better than prose alone.
+
+For each planned image, define:
+
+- role: cover or supporting;
+- placement: article lead or target section;
+- purpose;
+- prompt or visual brief;
+- alt text;
+- evidence status: direct, abstracted, or conceptual.
+
+Make every prompt ready for OpenAI image generation without depending on hidden context from the article draft.
+
+Do not add an image for every section by default.
+
+Do not propose visuals that depend on unsupported architecture, metrics, or private material.
+
+Done when: the article has one cover image brief and every extra image clearly earns its place.
+
+### 5. Draft from evidence
 
 Write the article so that it:
 
@@ -86,13 +114,14 @@ Do not invent architecture, benchmarks, business goals, user counts, production 
 
 Done when: every section advances the thesis and every non-trivial claim is traceable to evidence.
 
-### 5. Final pass
+### 6. Final pass
 
 Check that:
 
 - the article has a clear thesis;
 - it explains why the project matters;
 - it shows what was built and why the design choices mattered;
+- the cover image fits the thesis and any supporting images improve the article instead of decorating it;
 - tone and format match the request;
 - no secrets, private URLs, or internal-only details are exposed.
 
@@ -106,7 +135,11 @@ Unless the user asks otherwise, return:
 
 1. Suggested title.
 2. Short summary.
-3. Full article.
-4. References used, when they materially improve trust or traceability.
+3. Cover image brief.
+4. Supporting image briefs, only when they materially improve the article.
+5. Full article.
+6. References used, when they materially improve trust or traceability.
 
 If the user asks for MDX output, return the suggested `content/posts/<slug>.mdx` path and the complete file content that matches [reference/mdx-format.md](reference/mdx-format.md).
+
+Keep the cover image brief and any supporting image briefs outside the MDX body unless the user provides or approves exact image paths or placement conventions for the target blog.
