@@ -1,6 +1,6 @@
 ---
 name: to-prd
-description: Turn the current conversation into a PRD and publish it to an docs/PRD.md  file  — no interview, just synthesis of what you've already discussed.
+description: Turn the current conversation into a PRD and publish it to docs/PRD.md — no interview, just synthesis of what you've already discussed.
 ---
 
 This skill takes the current conversation context and codebase understanding and produces a PRD. Do NOT interview the user — just synthesize what you already know.
@@ -13,7 +13,7 @@ This skill takes the current conversation context and codebase understanding and
 
 Check with the user that these seams match their expectations.
 
-3. Write the PRD using the template below, then create a document on docs/PRD.md 
+3. Write the PRD using the template below, then write it to `docs/PRD.md`.
 
 <prd-template>
 
@@ -36,6 +36,15 @@ A LONG, numbered list of user stories. Each user story should be in the format o
 </user-story-example>
 
 This list of user stories should be extremely extensive and cover all aspects of the feature.
+
+## Acceptance Criteria
+
+A numbered list of observable, checkable outcomes that must be true when the work is done. `task-planner` maps every criterion to tasks and tests by its id, so each one must be verifiable on its own.
+
+- **AC-1**: <given / when / then, or a concrete observable outcome>
+- **AC-2**: …
+
+Reference the user stories each criterion covers. Include edge cases as their own criteria.
 
 ## Implementation Decisions
 

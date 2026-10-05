@@ -1,205 +1,130 @@
 ---
 name: task-planner
-description: Turn docs/PRD.md into a concrete, viable implementation plan for the current project. Use after to-prd and before tdd when a feature, refactor, or substantial bug fix needs task breakdown, affected files, risks, dependencies, and validation strategy.
+description: Turn docs/PRD.md into an implementation plan — an index at docs/TASKS.md plus one file per task in docs/tasks/. Use after to-prd and before tdd when a feature, refactor, or substantial bug fix needs task breakdown.
 ---
 
 # task-planner
 
-Use this skill after `to-prd` has produced or updated `docs/PRD.md` and before implementation starts with `tdd`.
+Transform the PRD into a plan that is specific to the repository, split into small tasks, and traceable to acceptance criteria.
 
-The purpose of this skill is to transform the PRD into an implementation-ready plan that is specific to the repository, small enough to execute safely, and directly traceable to acceptance criteria.
+The plan is an **index plus task files**:
 
-This skill must not implement code.
-This skill must not rewrite the PRD unless it finds a blocking gap.
-This skill must not invent requirements that are not present in the PRD or accepted project context.
+- `docs/TASKS.md` — the index. Routes to every task, and is the only place that tracks progress.
+- `docs/tasks/T<n>.md` — one spec per task, written once by this skill.
+- `docs/task-runs/T<n>-CONTEXT.md` and `docs/task-runs/T<n>-summary.md` — written later by `task-runner`, never by this skill. The index links to them once they exist.
 
-## Required Inputs
+Do not implement code, rewrite the PRD (unless a blocking gap exists), or invent requirements absent from the PRD or accepted project context.
 
-Before planning, read the available project memory and specification files in this order when they exist:
+## Inputs
 
-1. `PROJECT.md`
-2. `CONTEXT.md`
-3. `docs/PRD.md`
-4. `docs/adr/`
-5. `docs/GLOSSARY.md`
-6. Existing test files and project scripts relevant to the change
+Read in order, when they exist: `PROJECT.md`, `CONTEXT.md`, `docs/PRD.md`, `docs/adr/`, `docs/GLOSSARY.md`, then the tests and scripts relevant to the change.
 
-`docs/PRD.md` is mandatory for feature and refactor work.
+`docs/PRD.md` is mandatory for feature and refactor work. If it is missing or insufficient, stop and send the user back to `to-prd` or `grill-with-docs`. An urgent narrow bug fix may skip it only with the user's explicit approval; the plan must then still name the failing behavior, expected behavior, affected area, and regression test.
 
-For urgent narrow bug fixes, a full PRD may be skipped only if the user explicitly approved the shortcut. In that case, the planner must still identify the failing behavior, expected behavior, regression test, and affected area before implementation.
+If the repository structure is unclear, inspect it before planning. Follow existing project conventions.
 
-## Planning Goals
+## Steps
 
-The planner must produce a plan that answers:
+### 1. Draft vertical slices
 
-- what needs to be changed;
-- where the change is likely to happen;
-- which acceptance criteria each task satisfies;
-- which tests should be written or updated first;
-- what dependencies or ordering constraints exist;
-- what risks must be controlled;
-- what should not be changed.
+Break the work into small, reversible tasks, each implementable and validatable on its own. Never merge unrelated acceptance criteria into one task. Plan no broad rewrites unless the PRD requires them.
 
-The output must make implementation with `tdd` straightforward.
+Each task is a **tracer bullet**: a narrow but complete path through every layer it touches (schema, API, UI, tests), demoable or verifiable on its own, and sized to fit a single fresh context window. Look for prefactoring that makes the rest easier ("make the change easy, then make the easy change") and plan it first.
 
-## Required Output
+**Wide refactors are the exception.** A wide refactor is one mechanical change (rename a column, retype a shared symbol) whose blast radius fans across the codebase, so no vertical slice can land green. Sequence it as **expand–contract**: expand (add the new form beside the old), migrate call sites in batches sized by blast radius (each batch a task depending on the expand), then contract (remove the old form, depending on every batch).
 
-Create or update one of:
+Present the breakdown as a numbered list (title, depends on, ACs served, what it delivers) and ask:
 
-- `docs/TASKS.md` for a single active implementation plan; or
-- `docs/tasks/<feature-name>.md` when the repository keeps multiple task plans.
+- Does the granularity feel right (too coarse / too fine)?
+- Are the dependencies correct: does each task only depend on tasks that genuinely gate it?
+- Should any tasks be merged or split?
 
-Prefer `docs/TASKS.md` unless the project already has a different convention.
+Iterate until the user approves, then write the files.
 
-The task plan must include the following sections.
+Completion criterion: the user approved the breakdown.
 
-### 1. Source Context
+### 2. Write the task files
 
-List the documents and repository areas used to create the plan.
+Create one `docs/tasks/T<n>.md` per task (ids sequential: `T1`, `T2`, …):
 
-Include:
+```md
+# T<n> — <task title>
 
-- PRD path;
-- relevant ADRs;
-- relevant glossary entries;
-- project memory files consulted;
-- relevant existing modules, tests, or scripts.
+## Objective
 
-### 2. Implementation Goal
+## Acceptance Criteria Served
 
-Summarize the implementation objective in one short paragraph.
+## Affected Files / Areas
 
-This must be derived from `docs/PRD.md` and must not introduce new scope.
+## Test-First Plan
 
-### 3. Non-Goals
+## Implementation Notes
 
-List what must not be implemented during this task.
+## Dependencies
 
-Use this to enforce YAGNI and prevent speculative additions.
+## Completion Signal
+```
 
-### 4. Acceptance Criteria Mapping
+Task files carry no status. They must be self-contained: `task-runner` builds a context pack from one task file, not from the whole plan.
 
-Create a mapping from PRD acceptance criteria to implementation tasks and tests.
+Test-first plans prefer integration tests where behavior crosses API, database, filesystem, network, queue, cache, or service boundaries, and unit tests for pure logic. Where tests are infeasible, state why and name the safest validation alternative.
 
-Each acceptance criterion should map to at least one task or be explicitly marked as documentation-only, already satisfied, or blocked.
+Completion criterion: every PRD acceptance criterion is served by at least one task file, or is explicitly marked documentation-only, already satisfied, or blocked; every task file has a test-first plan and a checkable completion signal.
 
-Use this format:
+### 3. Write the index
+
+Create or update `docs/TASKS.md`:
+
+```md
+# Tasks
+
+## Source Context
+PRD path, ADRs, glossary entries, memory files, relevant modules/tests/scripts.
+
+## Implementation Goal
+One short paragraph derived from the PRD. No new scope.
+
+## Non-Goals
+What must not be implemented.
+
+## Tasks
+
+| Task | Title | Depends on | Status | Context | Summary |
+| --- | --- | --- | --- | --- | --- |
+| [T1](tasks/T1.md) | … | — | planned | — | — |
+
+## Acceptance Criteria Mapping
 
 | Acceptance Criterion | Task(s) | Test(s) | Status |
 | --- | --- | --- | --- |
 | AC-1 | T1, T2 | unit/integration/e2e | planned |
 
-### 5. Task Breakdown
+## Test Strategy
+Unit, integration, e2e/manual, regression, PRD edge cases, commands to run.
 
-Break the work into small, ordered tasks.
+## Risk Plan
+Risks and mitigations: data loss, public API, security, performance, concurrency, migrations, compatibility, UI regressions, flaky tests, operations.
 
-Each task must include:
+## Execution Order
+Recommended `tdd` order that keeps the project working after each step.
 
-- task id;
-- objective;
-- affected files or areas;
-- implementation notes;
-- test-first plan;
-- dependencies;
-- completion signal.
+## Open Questions
+Only blocking or materially relevant ones, otherwise: `No blocking open questions.`
 
-Tasks must be small enough to implement and validate independently.
-
-Use this format:
-
-```md
-## T1 — <task title>
-
-Objective:
-
-Affected files / areas:
-
-Test-first plan:
-
-Implementation notes:
-
-Dependencies:
-
-Completion signal:
+## Handoff
+Ready for `task-runner`. Start with T1.
 ```
 
-### 6. Test Strategy
+The **Tasks** table is the routing surface and the progress ledger:
 
-Define the expected test coverage before `tdd` starts.
+- Statuses: `planned`, `ready`, `in_progress`, `blocked`, `done`, `cancelled`. Every new task starts `planned` (or `ready` when it has no dependencies).
+- The **Context** and **Summary** cells hold `—` until `task-runner` links `task-runs/T<n>-CONTEXT.md` and `task-runs/T<n>-summary.md` there.
+- Progress lives only in this table; task files are never edited to record it.
 
-Include:
-
-- unit tests;
-- integration tests;
-- e2e or manual tests when relevant;
-- regression tests for bugs;
-- edge cases from the PRD;
-- commands expected to run.
-
-If tests are not feasible, explain why and define the safest validation alternative.
-
-### 7. Risk Plan
-
-List implementation risks and mitigation steps.
-
-Consider:
-
-- data loss;
-- public API changes;
-- authorization/security;
-- performance;
-- concurrency;
-- migrations;
-- compatibility;
-- UI regressions;
-- flaky tests;
-- operational risk.
-
-### 8. Execution Order
-
-Provide the recommended order for `tdd` execution.
-
-The order should minimize risk and keep the project working after each meaningful step.
-
-### 9. Open Questions
-
-List only questions that block or materially affect implementation.
-
-If no questions remain, state:
-
-`No blocking open questions.`
-
-### 10. Handoff to tdd
-
-End with a concise instruction for the next phase.
-
-Example:
-
-`Ready for tdd. Start with T1 and write the failing test described in the test-first plan.`
+Completion criterion: every file in `docs/tasks/` appears in the table, every table row links to an existing task file, and every section above is present.
 
 ## Rules
 
-- Do not start implementation.
-- Do not edit production code.
-- Do not silently expand scope beyond the PRD.
-- Do not collapse multiple unrelated acceptance criteria into one large task.
-- Do not plan broad rewrites unless the PRD explicitly requires them.
-- Prefer small, reversible tasks.
-- Prefer integration tests when behavior crosses API, database, filesystem, network, queue, cache, or service boundaries.
-- Prefer unit tests for pure logic and deterministic transformations.
-- Preserve existing project conventions.
-- If repository structure is unclear, inspect before planning.
-- If `docs/PRD.md` is missing or insufficient, stop and ask to return to `to-prd` or `grill-with-docs`.
-
-## Planning Quality Checklist
-
-Before finishing, verify:
-
-- every PRD acceptance criterion is mapped;
-- every task has a test-first plan;
-- task order is explicit;
-- affected files or areas are identified;
-- risks are documented;
-- non-goals are explicit;
-- no implementation was performed;
-- the plan is ready for `tdd`.
+- No production-code edits, no silent scope expansion.
+- One task = one file; never re-inline task bodies into `TASKS.md`.
+- Re-planning an existing plan: update task files and rows in place, and leave the status and run links of `done` tasks untouched.

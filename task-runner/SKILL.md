@@ -1,101 +1,57 @@
 ---
 name: task-runner
-description: Execute the next planned implementation task from docs/TASKS.md or docs/tasks/*.md. Use after task-planner or generate-project when the user wants to continue implementation one task at a time.
+description: Execute planned tasks from the docs/TASKS.md index — the next task, or several lanes in parallel subagents. Use after task-planner or generate-project when the user wants to continue implementation, or says "spawn N agents", "parallelize the tasks", "fan out the work".
 ---
 
 # task-runner
 
-Use this skill to run one planned implementation task through a tight loop:
+Run one planned task through a tight loop: select, claim, build a context pack, hand off to `tdd`, record, commit, stop.
 
-1. select one runnable task;
-2. prepare the smallest context pack that `tdd` needs;
-3. run `tdd` for that task only;
-4. record the outcome;
-5. stop.
+This skill orchestrates; it does not replace `tdd`, and never continues into a second task.
 
-This skill orchestrates implementation.
-It does not replace `tdd`.
-It must not silently continue into a second task.
+## Branches
 
-## Use
+- **Sequential** (default) — the steps below, one task per run.
+- **Parallel** — the user wants several agents at once: read [PARALLEL.md](PARALLEL.md) and follow it; each lane then runs this loop in lane mode.
+- **Lane mode** — you are a lane subagent and a brief names your tasks. For each named task, in brief order: skip step 1 (the brief selects) and step 2, do steps 3–5 without touching `docs/TASKS.md` (the orchestrator owns the index; the summary alone records the outcome), and replace step 7 with: continue to the next task in the brief, stopping at a `blocked` one or at the end of the list. Step 6 still applies, so each task gets its own commit.
 
-Use this skill when:
+## Plan layout
 
-- a task plan already exists in `docs/TASKS.md` or `docs/tasks/*.md`;
-- the user wants to continue planned implementation;
-- the user wants the next task executed without carrying the whole project history forward;
-- the user says "run the next task", "continue the task loop", or equivalent.
+- `docs/TASKS.md` — the index. Its **Tasks** table is the only place status and run links live (edited by this skill, or by the orchestrator in parallel runs).
+- `docs/tasks/T<n>.md` — the task spec. Read-only for this skill.
+- `docs/task-runs/T<n>-CONTEXT.md` and `docs/task-runs/T<n>-summary.md` — written by this skill.
 
 ## Redirect
 
-Do not use this skill when:
-
-- no task plan exists;
-- feature or refactor work is missing `docs/PRD.md`;
-- requirements are still being clarified;
-- the project foundation still needs to be generated;
-- the user wants broad implementation without task boundaries.
-
-If the task plan is missing, return to `task-planner`.
-
-If the project foundation is missing for a greenfield project, return to `generate-project`.
+- No `docs/TASKS.md`, or no `docs/tasks/T*.md` behind it → `task-planner`.
+- Feature or refactor work without `docs/PRD.md`, or requirements still unclear → `grill-with-docs` / `to-prd`.
+- Greenfield project without a foundation → `generate-project`.
+- Broad implementation with no task boundaries → not this skill.
 
 ## Inputs
 
-Read only the files needed to select and execute the next task.
+Read only what selecting and executing the task needs: `docs/TASKS.md`, the selected `docs/tasks/T<n>.md`, the PRD acceptance criteria it serves, the `T*-summary.md` of its dependencies, and `PROJECT.md` / `CONTEXT.md` / ADRs / glossary sections that bear on it.
 
-Possible inputs:
+## Steps
 
-1. `PROJECT.md`
-2. `CONTEXT.md`
-3. `docs/PRD.md`
-4. `docs/TASKS.md`
-5. `docs/tasks/*.md`
-6. `docs/adr/`
-7. `docs/GLOSSARY.md`
-8. previous files in `docs/task-runs/`
+### 1. Select one task
 
-Do not load every document blindly.
+Take from the Tasks table, in order: the first `ready` task; else the first `planned` task whose dependencies are all `done`; else a `blocked` task only if its blocker is resolved. Skip `done`, `cancelled`, `in_progress`, and unresolved `blocked` tasks unless the user names one. If none qualifies, stop and report there is no runnable task.
 
-## Task Selection
+Completion criterion: you can name the selected task id, its task file, and the acceptance criteria it serves.
 
-Select exactly one task from the active task plan.
+### 2. Claim it
 
-Priority:
+Set its **Status** to `in_progress` in the index.
 
-1. first task with `Status: ready`;
-2. otherwise first task with `Status: planned`;
-3. otherwise first task with `Status: blocked` only if the blocker is now resolved;
-4. otherwise stop and report that there is no runnable task.
-
-Do not take tasks marked `done`, `cancelled`, `blocked`, or `in_progress` unless the user explicitly names that task.
-
-## Tight Loop
-
-### 1. Load just enough context
-
-Read the smallest set of planning and memory files needed to understand the next runnable task.
-
-Completion criterion:
-You can name the active task-plan file, the selected task id, and the acceptance criteria that task serves.
-
-### 2. Claim one task
-
-Mark the selected task as `Status: in_progress` before implementation starts.
-
-Completion criterion:
-Exactly one task in the active plan is marked `in_progress` for this run.
+Completion criterion: exactly one row is `in_progress`, and it is this task.
 
 ### 3. Build the context pack
 
-Create or update:
-
-`docs/task-runs/<task-id>-context.md`
-
-Use this structure:
+Write `docs/task-runs/T<n>-CONTEXT.md`:
 
 ```md
-# <task-id> Context
+# T<n> Context
 
 ## Task
 
@@ -114,73 +70,22 @@ Use this structure:
 ## Definition of Done
 ```
 
-Keep the context pack tight.
-Summarize only the material needed for this task.
-Do not paste the full PRD or full task plan.
+Summarize from the task file, not the whole plan; do not paste the PRD. Link the file in the row's **Context** cell.
 
-Completion criterion:
-`tdd` can execute the task from the context pack without loading unrelated history.
+Completion criterion: `tdd` can execute the task from this file without loading unrelated history, and the index row links it.
 
 ### 4. Hand off to `tdd`
 
-Run `tdd` for the selected task only.
+Run `tdd` for this task only: failing test first when feasible, minimum code, relevant validation, refactor only when green, no unrelated edits.
 
-`tdd` should:
-
-- write or update the failing test first when feasible;
-- implement only the minimum code needed for this task;
-- run relevant validation;
-- refactor only after tests pass;
-- avoid unrelated edits.
-
-Completion criterion:
-Implementation and validation attempted only within the selected task boundary.
+Completion criterion: implementation and validation attempted within the task boundary.
 
 ### 5. Record the outcome
 
-Update the task plan status based on the result.
-
-Allowed statuses:
-
-- `planned`
-- `ready`
-- `in_progress`
-- `blocked`
-- `done`
-- `cancelled`
-
-Use:
-
-```txt
-Status: done
-```
-
-when the task is complete.
-
-Use:
-
-```txt
-Status: blocked
-Blocker: <reason>
-```
-
-when the task cannot continue.
-
-If validation fails and the issue cannot be fixed within scope, mark:
-
-```txt
-Status: blocked
-Blocker: failing validation
-```
-
-Create or update:
-
-`docs/task-runs/<task-id>-summary.md`
-
-Use this structure:
+Write `docs/task-runs/T<n>-summary.md`:
 
 ```md
-# <task-id> Summary
+# T<n> Summary
 
 ## Status
 
@@ -201,81 +106,28 @@ Use this structure:
 ## Context for Next Task
 ```
 
-This summary is the default prior-run context for future task executions.
+Then update the task's index row: **Status** `done`, or `blocked` when it cannot continue (a failing validation you cannot fix in scope counts), with the reason in the summary's Status section; link the file in the **Summary** cell. Never mark `done` without validation evidence or an explicit stated limitation.
 
-Completion criterion:
-The task plan status and the task summary both match the actual outcome of the run.
+Completion criterion: the summary, the row's status, and both links match what actually happened.
 
-### 6. Stop
+### 6. Commit
 
-After one task is `done` or `blocked`, stop.
+Skip only when the task is `blocked` or validation is red: never commit broken code unless the user asks. Otherwise make one atomic commit for the task containing its code, its tests, `T<n>-CONTEXT.md`, `T<n>-summary.md`, and the `docs/TASKS.md` index update (in lane mode the index is the orchestrator's, so leave it out). Stage those paths explicitly, never `git add -A`, so unrelated user changes stay out. Describe the change, not the task ("Add project health check endpoint", not "Done T2").
 
-The final response must say:
+Completion criterion: `git status` shows none of this task's files uncommitted, and the commit contains nothing from outside the task.
 
-- which task was executed;
-- whether it completed or blocked;
-- what the next runnable task is.
+### 7. Stop
 
-Completion criterion:
-No second task is started automatically.
+Final response: which task ran, whether it completed or blocked, and the next runnable task. Start nothing further.
 
-## Memory Updates
+## Memory updates
 
-After the run, decide whether the task revealed durable project knowledge.
-
-Update `CONTEXT.md` only for durable decisions, risks, domain rules, or implementation discoveries.
-
-Update `PROJECT.md` only if stable operational knowledge changed, such as scripts, setup, commands, architecture overview, or required services.
-
-Do not copy task-run summaries into `CONTEXT.md`.
-
-## Commits
-
-After a completed task, commit only when the environment allows it and the user has authorized commits.
-
-Commits must be atomic and describe the actual change, not the task number.
-
-Good examples:
-
-```txt
-Add project health check endpoint
-Configure integration test database setup
-Implement user creation validation
-```
-
-Bad examples:
-
-```txt
-Done task 2
-Update files
-Fix stuff
-```
-
-Do not commit broken code unless the user explicitly asks for that state.
+Update `CONTEXT.md` only for durable decisions, risks, domain rules, or discoveries; `PROJECT.md` only when stable operational knowledge changed (scripts, setup, commands, services). Never copy run summaries into either.
 
 ## Rules
 
-- execute exactly one task per run;
-- do not implement unrelated tasks;
-- do not load unnecessary context;
-- do not continue when scope is ambiguous;
-- do not overwrite unrelated user changes;
-- do not run destructive commands;
-- do not mark a task `done` without validation evidence or an explicit limitation;
-- do not bypass `tdd` for implementation;
-- do not edit the PRD to fit the implementation.
-
-## Checklist
-
-Before finishing, verify:
-
-- exactly one task was selected;
-- the task maps to explicit acceptance criteria;
-- a context pack was created or updated;
-- `tdd` was used for implementation;
-- tests were added or updated when feasible;
-- relevant validation commands were run or explicitly skipped with reason;
-- the task-plan status was updated;
-- a handoff summary was written;
-- the next runnable task is clear;
-- no unrelated task work was included.
+- One task at a time; no unrelated task work.
+- Never bypass `tdd`.
+- Never edit the PRD or the task files to fit the implementation; if the spec is wrong, mark the task `blocked` and say why.
+- Do not overwrite unrelated user changes or run destructive commands.
+- Do not continue when scope is ambiguous.
