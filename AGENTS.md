@@ -33,6 +33,7 @@ Load each phase's skill before working the phase (Claude Code: the Skill tool; C
 | Review only | `pr-review`; report findings, implement nothing unless asked |
 | Docs only | `grill-with-docs` if unclear; no PRD, plan, or `tdd` unless the docs define requirements or need executable validation |
 | After a session that went sideways | Suggest `/retro` |
+| Doubt that the tests protect real business flows | Suggest `/test-audit` |
 
 For a refactor, the PRD may be light but must state the behavior to preserve and how it is validated.
 

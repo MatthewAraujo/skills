@@ -67,6 +67,8 @@ Create one `docs/tasks/T<n>.md` per task (ids sequential: `T1`, `T2`, …):
 
 Task files carry no status. They must be self-contained: `task-runner` builds a context pack from one task file, not from the whole plan.
 
+A test-first plan lists **behaviors to protect**, not test names: one line per behavior as `AC-n → behavior → seam → bug it catches`, covering each AC's rules, edge cases, and failure paths, not only its happy path. A behavior with no nameable bug gets no test.
+
 Test-first plans prefer integration tests where behavior crosses API, database, filesystem, network, queue, cache, or service boundaries, and unit tests for pure logic. Where tests are infeasible, state why and name the safest validation alternative.
 
 Completion criterion: every PRD acceptance criterion is served by at least one task file, or is explicitly marked documentation-only, already satisfied, or blocked; every task file has a test-first plan and a checkable completion signal.

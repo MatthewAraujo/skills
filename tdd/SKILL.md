@@ -13,6 +13,8 @@ When exploring the codebase, read `docs/GLOSSARY.md` (if it exists) so test name
 
 Tests verify behavior through public interfaces, not implementation details. Code can change entirely; tests shouldn't. A good test reads like a specification: "user can checkout with valid cart" tells you exactly what capability exists, and it survives refactors because it doesn't care about internal structure.
 
+A test earns its place by the **bug it catches**. Before writing one, name the behavior it protects (an AC id or business flow) and the realistic defect that would turn it red. If you can't name the bug, don't write the test. One test per behavior: variants that exercise no new branch belong in the same table-driven test, not in new tests.
+
 Prefer integration tests where behavior crosses an API, database, filesystem, network, queue, or service boundary; unit tests for pure logic.
 
 See [tests.md](tests.md) for examples and [mocking.md](mocking.md) for mocking guidelines.
@@ -41,6 +43,7 @@ When the shape of that interface is itself in question (how deep the module is, 
 ## Checklist per cycle
 
 ```
+[ ] Test names the AC/flow it protects and the bug it catches
 [ ] Test describes behavior, not implementation
 [ ] Test uses public interface only
 [ ] Test would survive internal refactor
