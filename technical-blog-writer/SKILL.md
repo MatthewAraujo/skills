@@ -129,7 +129,21 @@ Do not repeat a generic "we learned a lot" paragraph. The ending should answer t
 
 **Distinctiveness audit:** remove formulaic headings, predictable transitions, empty intensity, generic conclusions, repetitive bullets, overexplained basics, pseudo-conversations, and any borrowed author mannerisms. Compare with the author's last three posts if available; vary the *argument shape* and lead, not just vocabulary.
 
-Apply `reference/editorial-rubric.md` when present. Revise weak categories; do not mechanically mention scores in the final published article.
+Apply `reference/editorial-rubric.md` when present. Revise weak categories; do not mechanically mention scores in the final published article. This is the **writer's internal pass**, separate from the fresh-context reviewer in step 8.
+
+
+### 8. Request an independent fresh-context review before delivery
+
+For a complete, publication-ready article, **delegate the final editorial critique to a separate subagent with a fresh context when the execution environment supports subagent spawning**. Do this *after* the writer's own editorial passes, not as another step in the same drafting conversation. Follow `reference/independent-review.md` for the handoff, reviewer prompt, issue format and acceptance gate.
+
+- The reviewer should be **blind to the writer's conversation, draft iterations, preferred angle, self-assessment and justification**. This reduces anchoring and self-confirmation, but does not make the review automatically correct or technically independent of the underlying model.
+- Supply only the **final draft**, target audience, reader promise, publication constraints, and a minimal **sanitized evidence packet** with verifiable source references. Blind to the drafting process does **not** mean blind to the evidence needed to check claims.
+- Ask for a **critical diagnosis, not a rewrite**. Require quoted locations, severity, explanation, proposed fix, and explicit separation of verified vs unverified technical claims.
+- Have the writer resolve blocking issues and substantial justified findings. Run at most one focused re-review on changed sections when a blocker warranted it; do not polish indefinitely to chase a score.
+- If the runtime cannot actually spawn an isolated subagent, **do not claim independent review happened**. Perform the rubric-based self-review as a fallback, mark it as non-independent in any review report, and disclose the limitation when reporting validation status.
+- Never send unpublished corporate data, secrets, private identifiers, or unsafe source excerpts to another agent; follow the same confidentiality boundary as the article.
+
+Treat the independent review as an editorial quality gate, **not** a substitute for tests, actual benchmarks, human approval, or a fact-check of sources the reviewer cannot access.
 
 ## Research style references
 
@@ -148,5 +162,7 @@ By default return the **article itself**, with a strong, accurate title and the 
 Only add a separate synopsis, SEO description, cover prompt, supporting image briefs, or structured review notes when explicitly asked for or required by the publication workflow. For MDX, follow the existing `reference/mdx-format.md` and website conventions; format and frontmatter requirements must not dictate narrative structure.
 
 ## Acceptance check
+
+Before calling an article reviewed, record whether fresh-context review ran, whether critical findings were addressed, and which source claims remain unverified. Do not present a self-review as an independent subagent review.
 
 A reader should be able to answer: **What was the real problem? What evidence changed the author's mind? How does the solution work? What did it cost or fail to solve? When should I copy this approach—and when shouldn't I?** Not every article needs all five, but every article needs a truthful central insight worth the reader's time.

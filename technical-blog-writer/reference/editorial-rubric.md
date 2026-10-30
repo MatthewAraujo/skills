@@ -38,3 +38,9 @@ The following are editorial **questions**, not claims about production:
 - Broad guides: would one focused decision or failure mechanism be more valuable than listing everything a tool can do?
 
 Before publication, ask: "What did the evidence teach the author that another developer can apply, and what could make the conclusion false?"
+
+## Independent review usage
+
+Use this rubric as one input to the fresh-context reviewer described in [independent-review.md](independent-review.md). Give the reviewer the article and a minimal, sanitized evidence map, **not** the writer's scores, intentions, discarded angles or previous critique.
+
+A score is a diagnostic aid, not a release authorization. The separate reviewer should identify concrete defects with quotes and severity. A high score does not override a blocking claim, confidentiality problem or unsupported production metric. A self-assessment is not independent review.
