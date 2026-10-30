@@ -1,31 +1,20 @@
-# Evidence Checklist
+# Evidence checklist
 
-Use this checklist when the repository is large, the article angle is still fuzzy, or the first source sweep missed too much.
+Review only materials relevant to the article's central question:
 
-## Source sweep
+- README, ADRs, architecture notes and user-provided project context;
+- `AGENTS.md`, `WORKFLOW.md`, `CONTEXT.md` or equivalent instructions;
+- source modules, tests, database schemas, migrations and config;
+- CI/CD files, operational records, logs and traces where safe to access;
+- commits, diffs, PRs, issues, agent sessions and field notes;
+- authoritative external docs, papers or benchmarks when needed.
 
-Inspect what matters to the thesis:
+For each consequential claim record: **claim, evidence/source, status, confidence, publication safety**. Use observed / measured / implemented / proposed / inferred / externally reported / unknown.
 
-- `README.md` and `docs/`;
-- `AGENTS.md`, `WORKFLOW.md`, `CONTEXT.md`, or equivalent project guidance;
-- package manifests and config;
-- source modules relevant to the article;
-- tests;
-- schema or migrations;
-- deployment files when the operational story matters;
-- Codex sessions;
-- commits, pull requests, issues, and diffs;
-- user notes.
+For numbers, check baseline, units, measurement method, workload, environment, sample/window and confounders. Distinguish p50, p95, p99, queue time, build time and deployment time. Never present estimated gains as measured improvements.
 
-Cut anything that does not support the article.
+For first-person claims, verify the author personally performed or observed the action. Commits or session transcripts are not permission to invent emotions, incidents or a sequence of mistakes.
 
-## Claim test
+Scrub API keys, tokens, internal URLs, customer data, sensitive logs, unpublished system details and confidential metrics. Reframe unsupported claims as hypotheses or remove them.
 
-For each important claim, ask:
-
-- What supports this?
-- Is it implemented, planned, attempted, or inferred?
-- Is it safe to publish?
-- Is it useful to the target reader?
-
-Cut or reframe claims that fail the test.
+Cut background material that does not advance the article's main question, even if technically true.

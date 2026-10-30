@@ -200,16 +200,7 @@ I started this project because...
 
 ## Body structure
 
-After the metadata export, start directly with the introduction paragraph.
-
-Do not add:
-
-* A duplicate `# Title`.
-* YAML frontmatter.
-* A table of contents unless the user asks for it.
-* A generic "Introduction" heading unless it improves the article.
-
-Preferred structure:
+After the metadata export, start directly with a concrete lead. Use the question-driven narrative selected through `reference/narrative-modes.md`. Do not add YAML frontmatter, duplicate `# Title`, a default table of contents, or mandatory "Introduction" headings.
 
 ```mdx
 export const metadata = {
@@ -218,42 +209,10 @@ export const metadata = {
   description: "{{description}}",
 };
 
-{{intro}}
-
-## The problem
-
-{{problem}}
-
-## What I built
-
-{{what_i_built}}
-
-## Architecture
-
-{{architecture}}
-
-## Development process
-
-{{development_process}}
-
-## The parts that were harder than expected
-
-{{challenges}}
-
-## What I learned
-
-{{learnings}}
-
-## What I would improve next
-
-{{future_work}}
-
-## Conclusion
-
-{{conclusion}}
+{{article_body}}
 ```
 
-The exact section names may change depending on the selected article pattern, but the output must remain valid MDX.
+`{{article_body}}` is the complete article: its argument, examples, and headings emerge from evidence and audience needs. Rendering conventions must not impose a fixed section order.
 
 ## Heading rules
 
@@ -478,35 +437,17 @@ The function returns `Promise<Post[]>`.
 
 ## Images
 
-Always prepare one cover image brief for every article.
+Plan an image when it serves the explanation: a diagram for architecture, a timeline for an incident, a trace for a causal sequence, or a chart for verified measurements.
 
-Keep the cover image brief outside the MDX body unless the user confirms the blog's cover-image metadata or file-path convention.
+Cover art is optional unless the user or site publishing workflow requires it. If required, provide a cover brief outside the MDX body, unless its metadata convention is explicitly known. A decorative cover never substitutes for an in-article explanatory visual.
 
-Add supporting images only when they materially improve comprehension or narrative flow.
+Use known and approved paths only; do not invent paths or metadata fields. Add descriptive alt text, purpose, placement, and label conceptual illustrations as conceptual. Do not expose confidential architectures, copy copyrighted images, or add an image to every section.
 
-When a supporting image is approved for placement in the post, use Markdown image syntax:
+Example only, with a path that must be validated before publication:
 
 ```md
-![Architecture diagram](/images/ai-backend-factory-architecture.png)
+![Request and timeout sequence](/images/timeout-sequence.png)
 ```
-
-Rules:
-
-* Use descriptive alt text.
-* Always include exactly one cover image brief.
-* Do not add inline images for every section by default.
-* Do not invent blog-specific metadata fields for images.
-* Do not invent image paths.
-* Do not include external images unless the user provides or approves them.
-* Do not include copyrighted images without permission.
-
-For each image brief, specify:
-
-* role: cover or supporting;
-* placement: article lead or target section;
-* purpose;
-* prompt or visual brief;
-* alt text.
 
 ## Tables
 
@@ -532,32 +473,9 @@ Avoid large tables in narrative posts.
 
 ## Tone and style
 
-The MDX format only defines the output structure.
+This file specifies **rendering constraints**, not author voice or a story skeleton. Follow `../SKILL.md`, `narrative-modes.md` and `editorial-rubric.md` for narrative decisions.
 
-The writing style should come from:
-
-* `akita-style-reference.md`
-* `article-patterns.md`
-* `../assets/mdx-post-template.mdx`
-* The user's explicit instructions
-
-Default writing style:
-
-* Technical.
-* Direct.
-* First-person when describing the user's own work.
-* Reflective.
-* Grounded in real project evidence.
-* Useful to other developers.
-
-Avoid:
-
-* Marketing copy.
-* Fake hype.
-* Unsupported claims.
-* Generic motivational writing.
-* Corporate announcement tone.
-* Copying the voice of any specific author.
+Prefer accurate engineer-to-engineer prose, first-person only for the author's actual experience, and section headings specific to the problem. Avoid robotic "not X but Y" contrasts, repetitive conclusions, artificial controversy, imitation of authors and padding. No single blog or author defines the default style.
 
 ## Evidence and accuracy
 
@@ -622,7 +540,7 @@ When sensitive information appears in the evidence, summarize it safely instead 
 
 ## Default MDX template
 
-Use this as the default template when no other article pattern is more appropriate:
+Use the neutral `../assets/mdx-post-template.mdx` as a **rendering shell**:
 
 ```mdx
 export const metadata = {
@@ -631,72 +549,16 @@ export const metadata = {
   description: "{{description}}",
 };
 
-{{intro}}
-
-## The problem
-
-{{problem}}
-
-## What I built
-
-{{what_i_built}}
-
-## Architecture
-
-{{architecture}}
-
-## Development process
-
-{{development_process}}
-
-## The parts that were harder than expected
-
-{{challenges}}
-
-## What I learned
-
-{{learnings}}
-
-## What I would improve next
-
-{{future_work}}
-
-## Conclusion
-
-{{conclusion}}
+{{article_body}}
 ```
+
+Do not replace `{{article_body}}` with a preordained "Problem / What I built / Architecture / Lessons / Conclusion" structure. The narrative follows the evidence and the reader's central question.
 
 ## Output requirements
 
-When returning a generated article, use this response shape:
+When returning a publishable MDX article, provide the suggested `content/posts/<slug>.mdx` path and the complete file body with the site's required metadata export.
 
-```txt
-Suggested file path:
-content/posts/<slug>.mdx
-
-Metadata:
-export const metadata = {
-  title: "...",
-  publishDate: "YYYY-MM-DD",
-  description: "...",
-};
-
-Cover image brief:
-...
-
-Supporting image briefs:
-...
-
-Full MDX:
-```
-
-Then provide the complete `.mdx` content.
-
-The final MDX must be ready to paste into:
-
-```txt
-content/posts/<slug>.mdx
-```
+Provide synopsis, cover prompt, image briefs, SEO copy or review notes only when the user requests them or the publication workflow requires them. Keep such material outside the MDX body. Do not invent image paths.
 
 ## Final validation checklist
 
@@ -706,13 +568,14 @@ Before returning the final MDX post, verify:
 * The slug is lowercase and hyphenated.
 * The post starts with `export const metadata`.
 * The metadata includes `title`, `publishDate`, and `description`.
-* Exactly one cover image brief is included outside the MDX body.
-* Any supporting image briefs are justified by the article instead of added by default.
+* Cover images or briefs are included only if required or requested, outside the MDX body unless the site's schema is known.
+* Supporting visual briefs explain something substantive instead of decorating sections.
 * The date uses `YYYY-MM-DD`.
 * The body does not include a duplicate `# Title`.
 * Main sections use `##`.
 * Code blocks have language identifiers.
 * No unsupported MDX components are used.
 * No secrets or private data are included.
-* Claims are grounded in repository, session, or user-provided evidence.
+* Claims are grounded in evidence and distinguish observed, measured, shipped, proposed, inferred and externally reported results.
+* Headings and section order follow the article's actual argument rather than a generic template.
 * The article is publishable as MDX.
