@@ -437,17 +437,21 @@ The function returns `Promise<Post[]>`.
 
 ## Images
 
-Plan an image when it serves the explanation: a diagram for architecture, a timeline for an incident, a trace for a causal sequence, or a chart for verified measurements.
+For Matthew's personal blog, **prepare a cover-art direction by default** following `cover-art-style.md`. The goal is a recognizable series of original conceptual engravings, not literal copies of another blog's images. For other publications, cover art is optional unless requested.
 
-Cover art is optional unless the user or site publishing workflow requires it. If required, provide a cover brief outside the MDX body, unless its metadata convention is explicitly known. A decorative cover never substitutes for an in-article explanatory visual.
+**Keep the cover brief and final image-generation prompt outside the MDX body** until a real, approved asset path and the website's exact metadata/placement convention are known. Do not invent frontmatter fields, cover paths, imports or thumbnails.
 
-Use known and approved paths only; do not invent paths or metadata fields. Add descriptive alt text, purpose, placement, and label conceptual illustrations as conceptual. Do not expose confidential architectures, copy copyrighted images, or add an image to every section.
+The recommended cover handoff contains `cover_art_direction`, `cover_art_concept`, `cover_art_symbolism`, `cover_art_prompt`, `cover_art_alt`, `cover_art_evidence_status` and (when genuinely generated) `cover_art_asset_path`. Use 700×380 only if that remains the target blog's confirmed convention; otherwise preserve the site's actual format and crop rules.
 
-Example only, with a path that must be validated before publication:
+Supporting diagrams and charts have a different job: explain architectures, timelines, measurements or algorithms truthfully. Use known and approved image paths with descriptive alt text, and never insert invented metrics, misleading representations, secret architecture, copyrighted assets or a decorative image for every section.
+
+Example of an **approved, already-existing** in-article asset:
 
 ```md
 ![Request and timeout sequence](/images/timeout-sequence.png)
 ```
+
+Do not claim an illustration has been rendered if only its prompt exists.
 
 ## Tables
 
@@ -568,7 +572,7 @@ Before returning the final MDX post, verify:
 * The slug is lowercase and hyphenated.
 * The post starts with `export const metadata`.
 * The metadata includes `title`, `publishDate`, and `description`.
-* Cover images or briefs are included only if required or requested, outside the MDX body unless the site's schema is known.
+* For Matthew's blog, a conceptual cover brief is provided by default unless opted out; for other sites, follow user/publishing requirements. Keep the brief outside MDX unless the site's schema is known.
 * Supporting visual briefs explain something substantive instead of decorating sections.
 * The date uses `YYYY-MM-DD`.
 * The body does not include a duplicate `# Title`.
