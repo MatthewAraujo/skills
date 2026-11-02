@@ -29,7 +29,7 @@ The core outcome is not "an article that looks technical". It is a memorable, te
 - Voice: conversational engineer-to-engineer, specific, curious, confident where evidence warrants, explicit about uncertainty. First person ONLY for work the user personally performed.
 - Format: publishable Markdown, or MDX when requested, respecting the target site's metadata schema and assets.
 - Depth: determined by complexity and reader promise; never by a rigid word count.
-- Visuals: OPTIONAL. Recommend architecture diagrams, timelines, before/after traces, or tables only when they explain reasoning. Cover art is optional unless the user asks for one. Do not assume any image generation API, credentials, or filesystem key path.
+- Visuals: prioritize explanatory diagrams, timelines, traces and charts when they help reasoning. For articles destined for Matthew's blog, prepare a consistent **cover-art brief by default** using `reference/cover-art-style.md` (unless opted out). For other destinations, cover art is optional. Do not assume an image API, credentials, filesystem paths, or that image generation ran.
 
 ## Workflow
 
@@ -121,6 +121,20 @@ Choose an ending that fits the evidence:
 
 Do not repeat a generic "we learned a lot" paragraph. The ending should answer the question the opening created. If the work is incomplete, finish with what is known, what remains speculative, and what would validate the thesis.
 
+### 6a. Establish the cover's editorial concept
+
+When preparing an article for Matthew's personal blog, create one cover-art direction using `reference/cover-art-style.md` and `assets/cover-prompt-examples.md`. This is a **visual house style**, not an instruction to reproduce another blog's artwork.
+
+- Extract the article's **single central engineering insight** and translate it into a **specific physical metaphor**. Generate three distinct concepts internally; select one with the clearest symbolism, best thumbnail legibility and least resemblance to previous covers.
+- Maintain the shared aesthetic (monochrome engraved illustration, fine cross-hatching, historical engineering atmosphere, horizontal editorial composition), but vary subjects and scenes. Never default every cover to a hooded scholar, crystal ball, pyramid, desk or server rack.
+- Produce a concise `cover_art_direction`, `cover_art_concept`, `cover_art_symbolism`, `cover_art_prompt`, `cover_art_alt` and `cover_art_evidence_status` (`conceptual`, `abstracted` or `direct`). Keep these **outside the MDX body** until the site's asset path is real and known.
+- The cover is a conceptual illustration, **not evidence** of measured performance, existing architecture, observed incident, or production behavior. Do not show fabricated statistics, readable labels, copyrighted branding, secrets or specific private infrastructure.
+- Generate and save the actual image only when the requested workflow includes generation and the runtime has a capable tool. If no image tool exists, deliver a usable standalone prompt; do not pretend an asset was created.
+- Follow the site's confirmed size requirements. If no verified constraints exist, target a horizontal composition around 1.84:1 (compatible with the skill's historic 700×380 cover convention) with crop-safe margins. Never invent publication metadata or file paths.
+- If the user wants a different style or no cover, follow that preference; house style is a default for this blog, not a universal rule.
+
+Supporting diagrams remain separate: draw an accurate system model when it explains the article better than metaphorical cover art.
+
 ### 7. Run three editorial passes
 
 **Technical audit:** claim status, sources, causality, measurement setup, uncertainty, safety/privacy, terminology, reproducibility and honest status of rollout.
@@ -129,7 +143,7 @@ Do not repeat a generic "we learned a lot" paragraph. The ending should answer t
 
 **Distinctiveness audit:** remove formulaic headings, predictable transitions, empty intensity, generic conclusions, repetitive bullets, overexplained basics, pseudo-conversations, and any borrowed author mannerisms. Compare with the author's last three posts if available; vary the *argument shape* and lead, not just vocabulary.
 
-Apply `reference/editorial-rubric.md` when present. Revise weak categories; do not mechanically mention scores in the final published article. This is the **writer's internal pass**, separate from the fresh-context reviewer in step 8.
+Apply `reference/editorial-rubric.md` when present. Revise weak categories; do not mechanically mention scores in the final published article. For a cover brief, also run the visual checks in `reference/cover-art-style.md`: recognizable metaphor, distinctive composition, safe publication, legible thumbnail and truthful conceptual status. This is the **writer's internal pass**, separate from the fresh-context reviewer in step 8.
 
 
 ### 8. Request an independent fresh-context review before delivery
@@ -137,7 +151,7 @@ Apply `reference/editorial-rubric.md` when present. Revise weak categories; do n
 For a complete, publication-ready article, **delegate the final editorial critique to a separate subagent with a fresh context when the execution environment supports subagent spawning**. Do this *after* the writer's own editorial passes, not as another step in the same drafting conversation. Follow `reference/independent-review.md` for the handoff, reviewer prompt, issue format and acceptance gate.
 
 - The reviewer should be **blind to the writer's conversation, draft iterations, preferred angle, self-assessment and justification**. This reduces anchoring and self-confirmation, but does not make the review automatically correct or technically independent of the underlying model.
-- Supply only the **final draft**, target audience, reader promise, publication constraints, and a minimal **sanitized evidence packet** with verifiable source references. Blind to the drafting process does **not** mean blind to the evidence needed to check claims.
+- Supply only the **final draft**, target audience, reader promise, publication constraints, any final cover-art brief (if present), and a minimal **sanitized evidence packet** with verifiable source references. Blind to the drafting process does **not** mean blind to the evidence needed to check claims. Ask the reviewer to flag a cover concept that contradicts the article or repeats stock motifs, without letting visual taste overrule technical accuracy.
 - Ask for a **critical diagnosis, not a rewrite**. Require quoted locations, severity, explanation, proposed fix, and explicit separation of verified vs unverified technical claims.
 - Have the writer resolve blocking issues and substantial justified findings. Run at most one focused re-review on changed sections when a blocker warranted it; do not polish indefinitely to chase a score.
 - If the runtime cannot actually spawn an isolated subagent, **do not claim independent review happened**. Perform the rubric-based self-review as a fallback, mark it as non-independent in any review report, and disclose the limitation when reporting validation status.
@@ -159,7 +173,7 @@ The specific approach must be chosen by article purpose; no brand or author rece
 
 By default return the **article itself**, with a strong, accurate title and the body. If the user requested a proposal instead, return a short editorial brief with 2–3 *meaningfully different* angle/title directions and your rationale. If sources matter, include concise references or inline links; distinguish internal source records from public links.
 
-Only add a separate synopsis, SEO description, cover prompt, supporting image briefs, or structured review notes when explicitly asked for or required by the publication workflow. For MDX, follow the existing `reference/mdx-format.md` and website conventions; format and frontmatter requirements must not dictate narrative structure.
+For Matthew's blog, provide the **cover-art brief by default** as a separate deliverable beside the publishable article (unless the user opted out). For other blogs, add a synopsis, SEO description, cover prompt, supporting image briefs or structured review notes only when requested or required. For MDX, follow `reference/mdx-format.md` and website conventions; format and frontmatter requirements must not dictate narrative structure. Only include an image path or generated file when it actually exists or has been approved.
 
 ## Acceptance check
 

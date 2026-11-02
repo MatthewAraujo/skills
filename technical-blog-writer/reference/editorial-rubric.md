@@ -44,3 +44,16 @@ Before publication, ask: "What did the evidence teach the author that another de
 Use this rubric as one input to the fresh-context reviewer described in [independent-review.md](independent-review.md). Give the reviewer the article and a minimal, sanitized evidence map, **not** the writer's scores, intentions, discarded angles or previous critique.
 
 A score is a diagnostic aid, not a release authorization. The separate reviewer should identify concrete defects with quotes and severity. A high score does not override a blocking claim, confidentiality problem or unsupported production metric. A self-assessment is not independent review.
+
+## Cover art quality (separate from the 20-point editorial text score)
+
+When the article is for Matthew's blog and a cover brief is supplied, check the visual direction against `cover-art-style.md`:
+
+- **Semantic fit:** is the central visual metaphor causally connected to the article's specific insight, rather than just "technology"?
+- **Recognition:** would the cover be legible when reduced to a blog-card thumbnail, with one primary subject and clear contrast?
+- **Series consistency:** monochrome engraving/cross-hatching, historical engineering mood, crop-safe horizontal composition, no text or logos.
+- **Distinctiveness:** avoid reproducing a reference artwork or repeating previous covers' same subject, symbols, scene and layout.
+- **Factual boundaries:** conceptual symbols must not imply actual measurements, incidents, proprietary architecture or verified system details.
+- **Publication readiness:** dimensions and metadata are verified; no invented image path, falsely claimed generated file or rights uncertainty.
+
+Treat visual quality as a separate editorial decision. A strong illustration cannot compensate for a technically inaccurate article.
